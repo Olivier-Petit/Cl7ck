@@ -7,7 +7,14 @@
  * Cl7ck.ino : Main file
  * Created 11 may 2012
  */
- 
+
+#include <SPI.h>
+
+#include "settings.h"
+#include "Display.h"
+
+Display disp;
+
 void setup()
 {
 }

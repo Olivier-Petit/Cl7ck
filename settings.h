@@ -8,7 +8,7 @@
  * Created 11 may 2012
  */
 
-#indef DEF_SETTINGS
+#ifndef DEF_SETTINGS
 #define DEF_SETTINGS
 
 #define PIN_BUZZER 3
