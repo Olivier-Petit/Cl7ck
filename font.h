@@ -5,11 +5,14 @@
  * License : CC BY-NC-SA http://creativecommons.org/licenses/by-nc-sa/3.0/
  * ------------
  * font.h : A 7-segment font file in ABCDEFG format (G is the lower bit, A the higher one)
- * Created 11 may 2012
+ * Created May 11th 2013
+ * Modified June 9th 2013
  */
  
 #ifndef DEF_FONT
 #define DEF_FONT
+
+#define FONT_SET_SIZE 62
 
 #define f_0 0x7E
 #define f_1 0x30
@@ -52,8 +55,8 @@
 #define f_J 0x7
 #define f_j 0x7
 
-//#define f_K
-//#define f_k
+#define f_K 0
+#define f_k 0
 
 #define f_L 0xE
 #define f_l 0x6
@@ -70,8 +73,8 @@
 #define f_P 0x67
 #define f_p 0x67
 
-//#define f_Q
-//#define f_q
+#define f_Q 0
+#define f_q 0
 
 #define f_R 0x5
 #define f_r 0x5
@@ -85,19 +88,19 @@
 #define f_U 0x3E
 #define f_u 0x1C
 
-//#define f_V
-//#define f_v
+#define f_V 0
+#define f_v 0
 
-//#define f_W
-//#define f_w
+#define f_W 0
+#define f_w 0
 
-//#define f_X
-//#define f_x
+#define f_X 0
+#define f_x 0
 
 #define f_Y 0x3D
 #define f_y 0X3D
 
-//#define f_Z 0x9B
-//#define f_z 0x9B
+#define f_Z 0x9B
+#define f_z 0x9B
 
 #endif
