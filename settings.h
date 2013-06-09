@@ -17,5 +17,6 @@
 #define PIN_MINUS  6
 #define PIN_BACK   5
 #define PIN_OK     7
+#define PIN_TEMP   2
 
 #endif
