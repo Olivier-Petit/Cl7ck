@@ -5,11 +5,14 @@
  * License : CC BY-NC-SA http://creativecommons.org/licenses/by-nc-sa/3.0/
  * ------------
  * settings.h : Various settings, mostly pin definitions
- * Created 11 may 2012
+ * Created May 11th 2013
+ * Modified June 9th 2013
  */
 
 #ifndef DEF_SETTINGS
 #define DEF_SETTINGS
+
+#define DEBUG
 
 #define PIN_BUZZER 3
 #define PIN_DISP   10
