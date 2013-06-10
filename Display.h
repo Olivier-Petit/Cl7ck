@@ -39,7 +39,10 @@ class Display
     void sendCommand(byte reg, byte val);
     byte getChar(char c);
     void setString(int pos, char* str);
+    void setString(int pos, char c);
+    void setString(int pos, int number, int length);
     void display();
+    void printBuffer();
   
   private:
     byte m_buffer[BUFFER_SIZE];

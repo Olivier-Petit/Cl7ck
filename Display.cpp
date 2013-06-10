@@ -55,7 +55,7 @@ void Display::sendCommand(byte reg, byte val)
 
 void Display::clearBuffer()
 {
-  for(int i = 0 ; i++ ; i < BUFFER_SIZE)
+  for(int i = 0 ; i < BUFFER_SIZE ; i++)
     m_buffer[i] = 0;
 }
 
@@ -91,7 +91,7 @@ void Display::setString(int pos, char* str)
   
   while(cont)
   {
-    if(str[i] != '\0' && (pos + i) < 20)
+    if(str[i] != '\0' && (pos + i) < BUFFER_SIZE && pos >= 0)
     {
       m_buffer[pos + i] = getChar(str[i]);
       i++;
@@ -101,10 +101,41 @@ void Display::setString(int pos, char* str)
   }
 }
 
+void Display::setString(int pos, char c)
+{
+  if(pos < BUFFER_SIZE && pos >= 0)
+    m_buffer[pos] = getChar(c);
+}
+
+void Display::setString(int pos, int number, int length)
+{
+  for(int i = pos + (length - 1) ; i >= pos ; i--)
+  {
+    char dig = (char)(number % 10) + '0';
+    Serial.println(number%10);
+    number /= 10;
+    
+    if(pos < BUFFER_SIZE && pos >= 0)
+    {
+      m_buffer[i] = getChar(dig);
+    }
+  }
+}
+
 void Display::display()
 {
   for(int i = 0 ; i < 8 ; i++)
   {
     sendCommand(i+1, m_buffer[i]);
   }
+}
+
+void Display::printBuffer()
+{
+  for(int i = 0 ; i < BUFFER_SIZE ; i++)
+  {
+    Serial.print(m_buffer[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
 }
