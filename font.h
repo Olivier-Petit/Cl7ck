@@ -49,8 +49,8 @@
 #define f_H 0x37
 #define f_h 0x17
 
-#define f_I 0x6
-#define f_i 0x4
+#define f_I 0x30
+#define f_i 0x10
 
 #define f_J 0x7
 #define f_j 0x7
@@ -59,13 +59,13 @@
 #define f_k 0
 
 #define f_L 0xE
-#define f_l 0x6
+#define f_l 0x30
 
 #define f_M 0x76
 #define f_m 0x76
 
 #define f_N 0x15
-#define f_n 0x17
+#define f_n 0x15
 
 #define f_O 0x7E
 #define f_o 0x1D
