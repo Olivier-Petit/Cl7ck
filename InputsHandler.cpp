@@ -64,6 +64,17 @@ boolean InputsHandler::pullButtonPress(int button)
   return false;
 }
 
+boolean InputsHandler::pullButtonPress(int button, int time)
+{
+  if(m_buttonState[button] == HIGH && m_buttonPulled[button] == false && (millis() - m_lastDebounceTime[button]) > time)
+  {
+    m_buttonPulled[button] = true;
+    return true;
+  }
+  
+  return false;
+}
+
 boolean InputsHandler::getButtonState(int button)
 {
   return m_buttonState[button];

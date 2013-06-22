@@ -23,6 +23,7 @@ class InputsHandler
     InputsHandler();
     void updateButtonStates();
     boolean pullButtonPress(int button);
+    boolean pullButtonPress(int button, int time);
     boolean getButtonState(int button);
   
   private:
