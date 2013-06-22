@@ -80,6 +80,8 @@ byte Display::getChar(char c)
     return (byte)pgm_read_byte_near(m_fontSet + 10 + (c -'A'));
   else if(c >= 'a' && c <= 'z')
     return (byte)pgm_read_byte_near(m_fontSet + 36 + (c - 'a'));
+  else if(c == '-')
+    return (byte)0x01;
   
   return (byte)0;
 }
@@ -112,7 +114,6 @@ void Display::setString(int pos, int number, int length)
   for(int i = pos + (length - 1) ; i >= pos ; i--)
   {
     char dig = (char)(number % 10) + '0';
-    Serial.println(number%10);
     number /= 10;
     
     if(pos < BUFFER_SIZE && pos >= 0)
