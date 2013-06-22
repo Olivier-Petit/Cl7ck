@@ -55,7 +55,7 @@ void setup()
   //tone(PIN_BUZZER, 2100);
   //delay(500);
   //noTone(PIN_BUZZER);
-
+  
   disp.clearBuffer();
   disp.setString(0, "Hello");
   disp.display();
@@ -73,6 +73,7 @@ void loop()
     disp.clearBuffer();
     
     mode[0] = MENU;
+    mode[1] = ALARM;
     firstCall = true;
   }
   
@@ -83,7 +84,7 @@ void loop()
   }
   
   // ---------- Modes handling ------------
-  if(level == 0 &&  mode[0] == TIME)
+  if(level == 0 &&  mode[0] == TIME) // ----------------- Time --------------
   {
     quickGoBack = false;
     quickGoToNextLevel = false;
@@ -98,7 +99,7 @@ void loop()
       disp.display();
     }
   }
-  else if(level == 0 && mode[0] == DATE)
+  else if(level == 0 && mode[0] == DATE) // -------------- Date -------------
   {
     quickGoBack = false;
     quickGoToNextLevel = false;
@@ -110,10 +111,13 @@ void loop()
       disp.setString(0, t.DOM, 2);
       disp.setString(3, t.month, 2);
       disp.setString(6, t.year, 2);
+      
+      disp.setString(2, '-');
+      disp.setString(5, '-');
       disp.display();
     }
   }
-  else if(level == 0 && mode[0] == MENU)
+  else if(level == 0 && mode[0] == MENU) // -------------- Menu --------------
   {
     boolean refresh = false;
     quickGoToNextLevel = true;
@@ -175,19 +179,19 @@ void loop()
       disp.display();
     }
   }
-  else if(level == 1 && mode[level] == ALARM)
+  else if(level == 1 && mode[level] == ALARM) // ----------- Set Alarm ---------
   {
-    quickGoBack = false;
+    quickGoBack = true;
     quickGoToNextLevel = false;
     
     if(firstCall)
     {
-      disp.setString(0, "LOL");
+      disp.setString(0, "Not Done");
       disp.display();
       firstCall = false;
     }
   }
-  else if(level == 1 && mode[level] == SET_BRIGHTNESS)
+  else if(level == 1 && mode[level] == SET_BRIGHTNESS) // ---------- Set Brightness -----------
   {
     boolean refresh = false;
     quickGoToNextLevel = false;
@@ -214,6 +218,107 @@ void loop()
     if(refresh)
     {
       disp.setString(3, disp.getBrightness(), 2);
+      disp.display();
+    }
+  }
+  else if(level >= 1 && mode[1] == SET_TIME) // ------------- Setting Time -------------
+  {
+    boolean refresh = false;
+    quickGoBack = true;
+    
+    if(firstCall)
+    {
+      firstCall = false;
+      refresh = true;
+      
+      if(level == 1)
+      {
+        disp.setDP(0, true);disp.setDP(1, true);
+      }
+      else if(level == 2)
+      {
+        disp.setDP(0, false); disp.setDP(1, false);
+        disp.setDP(3, true);disp.setDP(4, true);
+      }
+      else if(level == 3)
+      {
+        disp.setDP(3, false); disp.setDP(4, false);
+        disp.setDP(6, true);disp.setDP(7, true);
+      }
+    }
+    
+    DateTime time = rtc.getTime();
+    
+    if(level ==  1) // Hours
+    {
+      quickGoToNextLevel = true;
+      
+      if(inputs.pullButtonPress(MINUS))
+      {
+        refresh = true;
+        time.hours = time.hours + 1;
+      }
+      
+      if(inputs.pullButtonPress(PLUS))
+      {
+        refresh = true;
+        time.hours = time.hours - 1;
+      }
+    }
+    else if(level == 2) // Mins
+    {
+      quickGoToNextLevel = true;
+      
+      if(inputs.pullButtonPress(MINUS))
+      {
+        refresh = true;
+        time.mins = time.mins + 1;
+      }
+      
+      if(inputs.pullButtonPress(PLUS))
+      {
+        refresh = true;
+        time.mins = time.mins - 1;
+      }
+    }
+    else if(level == 3) // Secs
+    {
+      quickGoToNextLevel = false;
+      
+      if(inputs.pullButtonPress(MINUS))
+      {
+        refresh = true;
+        time.secs = time.secs + 1;
+      }
+      
+      if(inputs.pullButtonPress(PLUS))
+      {
+        refresh = true;
+        time.secs = time.secs - 1;
+      }
+      
+      if(inputs.pullButtonPress(OK)) // Done !
+      {
+        rtc.setTime(time);
+        rtc.setRTCTime(); // Write time to DS3231
+        
+        level = 0;
+        mode[0] = TIME;
+        disp.setDP(6, false);
+        disp.setDP(7, false);
+      }
+    }
+    
+    if(refresh)
+    {
+      // The TimeHandler class validates the data, so use it before display.
+      rtc.setTime(time);
+      time = rtc.getTime(); // Get the validated data
+      
+      // Display it !
+      disp.setString(0, time.hours, 2);
+      disp.setString(3, time.mins, 2);
+      disp.setString(6, time.secs, 2);
       disp.display();
     }
   }

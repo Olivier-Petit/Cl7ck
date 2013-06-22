@@ -39,7 +39,7 @@ class TimeHandler
     void initializeRTC();
     boolean updateTime();
     DateTime getTime();
-    
+    void setTime(DateTime time);
     void setRTCTime();
     
     #ifdef DEBUG

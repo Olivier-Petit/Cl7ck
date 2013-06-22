@@ -96,11 +96,32 @@ byte TimeHandler::bcdToDec(byte val)
   return ((val/16*10) + (val%16));
 }
 
+void TimeHandler::setTime(DateTime time)
+{
+  m_time = time;
+  
+  // Validate the data (a bit special because we use unsigned ints)
+  if(m_time.hours == 65535)
+    m_time.hours = 23;
+  if(m_time.hours > 23)
+    m_time.hours = 0;
+  
+  if(m_time.mins == 65535)
+    m_time.mins = 59;
+  if(m_time.mins > 59)
+    m_time.mins = 0;
+  
+  if(m_time.secs == 65535)
+    m_time.secs = 59;
+  if(m_time.secs > 59)
+    m_time.secs = 0;
+}
+
 // Used to write time to the RTC
 void TimeHandler::setRTCTime()
 {
   Wire.beginTransmission(DS3231S_ADDR);
-  Wire.write((byte)0x00); // Start at register 0x00 (seconnds)
+  Wire.write((byte)0x00); // Start at register 0x00 (seconds)
 
   // Write the data
   Wire.write(decToBcd((byte)m_time.secs));
