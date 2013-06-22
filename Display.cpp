@@ -37,7 +37,7 @@ Display::Display(prog_char fontSet[])
   
   sendCommand(MAX_REG_DECODEMODE, 0x00); // No decode
   sendCommand(MAX_REG_SCANLIMIT, 0x07); // Only digits 0->3
-  sendCommand(MAX_REG_INTENSITY, 0x0F); // Max brightness
+  setBrightness(0x0F); // Max Brightness
   sendCommand(MAX_REG_DISPLAYTEST, 0x00); // No test mode
   sendCommand(MAX_REG_SHUTDOWN, 0x01); // Leaving shutdown mode
   
@@ -128,6 +128,23 @@ void Display::display()
   {
     sendCommand(i+1, m_buffer[i]);
   }
+}
+
+int Display::getBrightness()
+{
+  return (int)m_brightness;
+}
+
+void Display::setBrightness(int brightness)
+{
+  if(brightness < 0)
+    m_brightness = 0;
+  else if(brightness > 0x0F)
+    m_brightness = 0x0F;
+  else
+    m_brightness = (byte)brightness;
+  
+  sendCommand(MAX_REG_INTENSITY, m_brightness);
 }
 
 void Display::printBuffer()

@@ -36,18 +36,22 @@ class Display
     void setDigit(int dig, int val);
     void clearBuffer();
     void setDP(int dig, boolean dp);
-    void sendCommand(byte reg, byte val);
     byte getChar(char c);
     void setString(int pos, char* str);
     void setString(int pos, char c);
     void setString(int pos, int number, int length);
     void display();
+    int getBrightness();
+    void setBrightness(int brightness);
+    
     void printBuffer();
   
   private:
     byte m_buffer[BUFFER_SIZE];
-    //void sendCommand(byte reg, byte val);
+    void sendCommand(byte reg, byte val);
+    
     prog_char *m_fontSet PROGMEM;
+    byte m_brightness;
   };
 
 #endif
