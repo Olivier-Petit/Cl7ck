@@ -40,7 +40,7 @@ class TimeHandler
     boolean updateTime();
     DateTime getTime();
     void setTime(DateTime time);
-    void setRTCTime();
+    int setRTCTime();
     
     #ifdef DEBUG
       void printTime();

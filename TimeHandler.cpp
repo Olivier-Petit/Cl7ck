@@ -101,6 +101,10 @@ void TimeHandler::setTime(DateTime time)
   m_time = time;
   
   // Validate the data (a bit special because we use unsigned ints)
+  /* ----> Note : Date integrity (leap year and so on) is verified in TimeHandler::setRTCTime()
+                  because when setting the date, you set the DOM first, so you might have a invalid
+                  date a some point, which is okay...
+  */              
   if(m_time.hours == 65535)
     m_time.hours = 23;
   if(m_time.hours > 23)
@@ -115,32 +119,63 @@ void TimeHandler::setTime(DateTime time)
     m_time.secs = 59;
   if(m_time.secs > 59)
     m_time.secs = 0;
+  
+  if(m_time.DOM == 65535)
+    m_time.DOM = 31;
+  if(m_time.DOM > 31)
+    m_time.DOM = 1;
+  
+  if(m_time.month == 65535)
+    m_time.month = 12;
+  if(m_time.month > 12)
+    m_time.month = 1;
+    
+  if(m_time.year == 65535)
+    m_time.month = 99;
+  if(m_time.year > 99)
+    m_time.year = 0;
 }
 
 // Used to write time to the RTC
-void TimeHandler::setRTCTime()
+int TimeHandler::setRTCTime()
 {
-  Wire.beginTransmission(DS3231S_ADDR);
-  Wire.write((byte)0x00); // Start at register 0x00 (seconds)
-
-  // Write the data
-  Wire.write(decToBcd((byte)m_time.secs));
-  Wire.write(decToBcd((byte)m_time.mins));
-  Wire.write(decToBcd((byte)m_time.hours));
-  Wire.write(decToBcd((byte)m_time.DOW));
-  Wire.write(decToBcd((byte)m_time.DOM));
-  Wire.write(decToBcd((byte)m_time.month));
-  Wire.write(decToBcd((byte)m_time.year));
   
-  /*Wire.write(decToBcd((byte)0));
-  Wire.write(decToBcd((byte)52));
-  Wire.write(decToBcd((byte)19));
-  Wire.write(decToBcd((byte)7));
-  Wire.write(decToBcd((byte)9));
-  Wire.write(decToBcd((byte)6));
-  Wire.write(decToBcd((byte)13));*/
-
-  Wire.endTransmission();
+  // Check date integrity
+  boolean dateOK = true;
+  
+  // February
+  boolean leapYear = (m_time.year % 4) == 0 ? true : false; // This is not exactly the real rule, but It's valid until 2099
+  
+  if(m_time.month == 2U && (m_time.DOM == 30U || m_time.DOM == 31 || (m_time.DOM == 29U && leapYear == false)))
+    dateOK = false;
+        
+  // Check for number of days
+  if(m_time.DOM == 31U && (m_time.month == 4U || m_time.month == 6U || m_time.month == 9U || m_time.month == 11U))
+     dateOK = false;
+  
+  
+  if(!dateOK)
+  {
+    return 1;
+  }
+  else
+  {
+    Wire.beginTransmission(DS3231S_ADDR);
+    Wire.write((byte)0x00); // Start at register 0x00 (seconds)
+  
+    // Write the data
+    Wire.write(decToBcd((byte)m_time.secs));
+    Wire.write(decToBcd((byte)m_time.mins));
+    Wire.write(decToBcd((byte)m_time.hours));
+    Wire.write(decToBcd((byte)m_time.DOW));
+    Wire.write(decToBcd((byte)m_time.DOM));
+    Wire.write(decToBcd((byte)m_time.month));
+    Wire.write(decToBcd((byte)m_time.year));
+    
+    Wire.endTransmission();
+    
+    return 0;
+  }
 }
 
 // --------- Debuging functions ---------
