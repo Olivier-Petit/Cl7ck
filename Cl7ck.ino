@@ -52,7 +52,6 @@ void setup()
   for(int i = 0 ; i < STATE_LEVELS ; i++)
     mode[i] = 0;
 
-  pinMode(PIN_MINUS, OUTPUT);
   pinMode(PIN_BUZZER, OUTPUT);
   //tone(PIN_BUZZER, 2100);
   //delay(500);
@@ -216,6 +215,9 @@ void loop()
       refresh = true;
       disp.setBrightness(disp.getBrightness() - 1); // Display::setBrightness(int) takes care of overflow
     }
+    
+    if(inputs.pullButtonPress(OK))
+      goBack();
 
     if(refresh)
     {
