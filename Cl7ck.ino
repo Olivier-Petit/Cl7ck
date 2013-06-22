@@ -23,21 +23,32 @@ prog_char fontSet[FONT_SET_SIZE] PROGMEM = {
   f_A,f_B,f_C,f_D,f_E,f_F,f_G,f_H,f_I,f_J,f_K,f_L,f_M,f_N,f_O,f_P,f_Q,f_R,f_S,f_T,f_U,f_V,f_W,f_X,f_Y,f_Z,
   f_a,f_b,f_c,f_d,f_e,f_f,f_g,f_h,f_i,f_j,f_k,f_l,f_m,f_n,f_o,f_p,f_q,f_r,f_s,f_t,f_u,f_v,f_w,f_x,f_y,f_z};
   
-// Lambda enumeration for mode keeping
-enum{TIME = 0, DATE = 1};
+// Lambda enumeration for modes
+enum{TIME = 0, DATE = 1, MENU = 2};
+enum{ALARM = 0, SET_BRIGHTNESS = 1, SET_TIME = 2, SET_DATE = 3};
+
+#define STATE_LEVELS 10
 
 Display disp(fontSet);
 TimeHandler rtc;
 InputsHandler inputs;
 
-int mode = TIME;
-
+int mode[STATE_LEVELS];
+int level = 0;
+boolean firstCall = true;
+boolean quickGoBack = false; // Modes set it to false when a complicated action is needed when back is pressed
+boolean quickGoToNextLevel = false; // Modes set it to false when a complicated action is needed when ok is pressed
 
 void setup()
 {
   Serial.begin(9600);
-
+  
+  // Initialize RTC   
   rtc.initializeRTC();
+  
+  // Initialize the state array
+  for(int i = 0 ; i < STATE_LEVELS ; i++)
+    mode[i] = 0;
 
   pinMode(PIN_MINUS, OUTPUT);
   pinMode(PIN_BUZZER, OUTPUT);
@@ -56,17 +67,27 @@ void loop()
 {
   inputs.updateButtonStates();
   
-  // ChangeMode
-  if(inputs.pullButtonPress(OK))
+  // /----------- Change Mode -------------
+  if(level == 0 && inputs.pullButtonPress(OK, 1000))
   {
     disp.clearBuffer();
-    mode = !mode;
+    
+    mode[0] = MENU;
+    firstCall = true;
   }
   
-  
-  // Update display
-  if(mode == TIME)
+  if(level == 0 && mode[0] != MENU && inputs.pullButtonPress(OK))
   {
+    disp.clearBuffer();
+    mode[0] = (mode[0] + 1) % 2;
+  }
+  
+  // ---------- Modes handling ------------
+  if(level == 0 &&  mode[0] == TIME)
+  {
+    quickGoBack = false;
+    quickGoToNextLevel = false;
+    
     if(rtc.updateTime())
     {
       DateTime t = rtc.getTime();
@@ -77,8 +98,11 @@ void loop()
       disp.display();
     }
   }
-  else if(mode == DATE)
+  else if(level == 0 && mode[0] == DATE)
   {
+    quickGoBack = false;
+    quickGoToNextLevel = false;
+    
     if(rtc.updateTime())
     {
       DateTime t = rtc.getTime();
@@ -89,5 +113,131 @@ void loop()
       disp.display();
     }
   }
+  else if(level == 0 && mode[0] == MENU)
+  {
+    boolean refresh = false;
+    quickGoToNextLevel = true;
+    quickGoBack = false;
+    
+    if(firstCall)
+    {
+      refresh = true;
+      firstCall = false;
+    }
+      
+    if(inputs.pullButtonPress(MINUS))
+    {
+      refresh = true;
+      mode[level + 1] = (mode[level + 1] == 0) ? SET_DATE : (mode[level + 1] - 1);
+    }
+    
+    if(inputs.pullButtonPress(PLUS))
+    {
+      refresh = true;
+      mode[level + 1] = (mode[level + 1] + 1) % 4;
+    }
+    
+    if(inputs.pullButtonPress(BACK))
+    {
+      level = 0;
+      mode[0] = 0;
+      disp.clearBuffer();
+    }
+    
+    if(refresh)
+    {
+      disp.clearBuffer();
+      
+      switch(mode[level + 1])
+      {
+        case ALARM:
+        {
+          disp.setString(0, "Alarm");
+          break;
+        }
+        case SET_BRIGHTNESS:
+        {
+          disp.setString(0, "Brghtnss");
+          break;
+        }
+        case SET_TIME:
+        {
+          disp.setString(0, "Set Time");
+          break;
+        }
+        case SET_DATE:
+        {
+          disp.setString(0, "Set Date");
+          break;
+        }
+      }
+      
+      disp.display();
+    }
+  }
+  else if(level == 1 && mode[level] == ALARM)
+  {
+    quickGoBack = false;
+    quickGoToNextLevel = false;
+    
+    if(firstCall)
+    {
+      disp.setString(0, "LOL");
+      disp.display();
+      firstCall = false;
+    }
+  }
+  else if(level == 1 && mode[level] == SET_BRIGHTNESS)
+  {
+    boolean refresh = false;
+    quickGoToNextLevel = false;
+    quickGoBack = true;
+    
+    if(firstCall)
+    {
+      firstCall = false;
+      refresh = true;
+    }
+    
+    if(inputs.pullButtonPress(PLUS))
+    {
+      refresh = true;
+      disp.setBrightness(disp.getBrightness() + 1); // Display::setBrightness(int) takes care of overflow
+    }
+    
+    if(inputs.pullButtonPress(MINUS))
+    {
+      refresh = true;
+      disp.setBrightness(disp.getBrightness() - 1); // Display::setBrightness(int) takes care of overflow
+    }
+    
+    if(refresh)
+    {
+      disp.setString(3, disp.getBrightness(), 2);
+      disp.display();
+    }
+  }
+  
+  if(inputs.pullButtonPress(OK) && quickGoToNextLevel)
+    goToNextLevel();
+  if(inputs.pullButtonPress(BACK) && quickGoBack)
+    goBack();
+}
+
+// ------------------------------------------------------------------------------
+
+
+void goToNextLevel()
+{
+  level++;
+  firstCall = true;
+  disp.clearBuffer();
+}
+
+void goBack()
+{
+  level--;
+  firstCall = true;
+  disp.clearBuffer();
 }
 
