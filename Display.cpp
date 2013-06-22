@@ -95,7 +95,7 @@ void Display::setString(int pos, char* str)
   {
     if(str[i] != '\0' && (pos + i) < BUFFER_SIZE && pos >= 0)
     {
-      m_buffer[pos + i] = getChar(str[i]);
+      setDigit(pos + i, getChar(str[i]));
       i++;
     }
     else
@@ -106,7 +106,7 @@ void Display::setString(int pos, char* str)
 void Display::setString(int pos, char c)
 {
   if(pos < BUFFER_SIZE && pos >= 0)
-    m_buffer[pos] = getChar(c);
+    setDigit(pos, getChar(c));
 }
 
 void Display::setString(int pos, int number, int length)
@@ -118,7 +118,7 @@ void Display::setString(int pos, int number, int length)
     
     if(pos < BUFFER_SIZE && pos >= 0)
     {
-      m_buffer[i] = getChar(dig);
+      setDigit(i, getChar(dig));
     }
   }
 }
