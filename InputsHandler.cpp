@@ -27,6 +27,7 @@ InputsHandler::InputsHandler()
     m_buttonState[i] = LOW;
     m_lastButtonState[i] = LOW;
     m_buttonPulled[i] = false;
+    m_buttonTimePulled[i] = false;
   }
 }
 
@@ -45,7 +46,10 @@ void InputsHandler::updateButtonStates()
     else if(millis() - m_lastDebounceTime[i] >= DEBOUNCE_DELAY)
     {
       if(m_buttonState[i] == LOW)
+      {
         m_buttonPulled[i] = false;
+        m_buttonTimePulled[i] = false;
+      }
       m_buttonState[i] = reading;
     }
       
@@ -66,9 +70,9 @@ boolean InputsHandler::pullButtonPress(int button)
 
 boolean InputsHandler::pullButtonPress(int button, int time)
 {
-  if(m_buttonState[button] == HIGH && m_buttonPulled[button] == false && (millis() - m_lastDebounceTime[button]) > time)
+  if(m_buttonState[button] == HIGH && m_buttonTimePulled[button] == false && (millis() - m_lastDebounceTime[button]) > time)
   {
-    m_buttonPulled[button] = true;
+    m_buttonTimePulled[button] = true;
     return true;
   }
   

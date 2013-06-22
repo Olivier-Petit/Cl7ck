@@ -31,6 +31,7 @@ class InputsHandler
     boolean m_buttonState[4];
     boolean m_lastButtonState[4];
     boolean m_buttonPulled[4];
+    boolean m_buttonTimePulled[4];
     static const int m_buttonPins[4];
 };
 
