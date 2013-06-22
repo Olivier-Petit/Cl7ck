@@ -253,13 +253,13 @@ void loop()
     {
       quickGoToNextLevel = true;
       
-      if(inputs.pullButtonPress(MINUS))
+      if(inputs.pullButtonPress(PLUS))
       {
         refresh = true;
         time.hours = time.hours + 1;
       }
       
-      if(inputs.pullButtonPress(PLUS))
+      if(inputs.pullButtonPress(MINUS))
       {
         refresh = true;
         time.hours = time.hours - 1;
@@ -269,13 +269,13 @@ void loop()
     {
       quickGoToNextLevel = true;
       
-      if(inputs.pullButtonPress(MINUS))
+      if(inputs.pullButtonPress(PLUS))
       {
         refresh = true;
         time.mins = time.mins + 1;
       }
       
-      if(inputs.pullButtonPress(PLUS))
+      if(inputs.pullButtonPress(MINUS))
       {
         refresh = true;
         time.mins = time.mins - 1;
@@ -285,13 +285,13 @@ void loop()
     {
       quickGoToNextLevel = false;
       
-      if(inputs.pullButtonPress(MINUS))
+      if(inputs.pullButtonPress(PLUS))
       {
         refresh = true;
         time.secs = time.secs + 1;
       }
       
-      if(inputs.pullButtonPress(PLUS))
+      if(inputs.pullButtonPress(MINUS))
       {
         refresh = true;
         time.secs = time.secs - 1;
