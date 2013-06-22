@@ -22,13 +22,13 @@
 // Constructor
 TimeHandler::TimeHandler()
 {
-  m_hours = 0U;
-  m_mins = 0U;
-  m_secs = 0U;
-  m_DOM = 0U;
-  m_DOW = 0U;
-  m_month = 0U;
-  m_year = 0U;
+  m_time.hours = 0U;
+  m_time.mins = 0U;
+  m_time.secs = 0U;
+  m_time.DOM = 0U;
+  m_time.DOW = 0U;
+  m_time.month = 0U;
+  m_time.year = 0U;
 
   m_lastRTCCheck = 0UL;
 }
@@ -44,13 +44,13 @@ void TimeHandler::getRTCTime()
   while(Wire.available()) // Wait for the data to come
   {
     // Read the data
-    m_secs = (unsigned int)bcdToDec(Wire.read());
-    m_mins = (unsigned int)bcdToDec(Wire.read());
-    m_hours = (unsigned int)bcdToDec(Wire.read());
-    m_DOW = (unsigned int)bcdToDec(Wire.read());
-    m_DOM = (unsigned int)bcdToDec(Wire.read());
-    m_month = (unsigned int)bcdToDec(Wire.read());
-    m_year = (unsigned int)bcdToDec(Wire.read());
+    m_time.secs = (unsigned int)bcdToDec(Wire.read());
+    m_time.mins = (unsigned int)bcdToDec(Wire.read());
+    m_time.hours = (unsigned int)bcdToDec(Wire.read());
+    m_time.DOW = (unsigned int)bcdToDec(Wire.read());
+    m_time.DOM = (unsigned int)bcdToDec(Wire.read());
+    m_time.month = (unsigned int)bcdToDec(Wire.read());
+    m_time.year = (unsigned int)bcdToDec(Wire.read());
   }
 }
 
@@ -68,19 +68,9 @@ boolean TimeHandler::updateTime()
     return false;
 }
 
-unsigned int TimeHandler::getHours()
+DateTime TimeHandler::getTime()
 {
-  return m_hours;
-}
-
-unsigned int TimeHandler::getMins()
-{
-  return m_mins;
-}
-
-unsigned int TimeHandler::getSecs()
-{
-  return m_secs;
+  return m_time;
 }
 
 // Used to initialize the RTC (Chronodot)
@@ -113,13 +103,13 @@ void TimeHandler::setRTCTime()
   Wire.write((byte)0x00); // Start at register 0x00 (seconnds)
 
   // Write the data
-  Wire.write(decToBcd((byte)m_secs));
-  Wire.write(decToBcd((byte)m_mins));
-  Wire.write(decToBcd((byte)m_hours));
-  Wire.write(decToBcd((byte)m_DOW));
-  Wire.write(decToBcd((byte)m_DOM));
-  Wire.write(decToBcd((byte)m_month));
-  Wire.write(decToBcd((byte)m_year));
+  Wire.write(decToBcd((byte)m_time.secs));
+  Wire.write(decToBcd((byte)m_time.mins));
+  Wire.write(decToBcd((byte)m_time.hours));
+  Wire.write(decToBcd((byte)m_time.DOW));
+  Wire.write(decToBcd((byte)m_time.DOM));
+  Wire.write(decToBcd((byte)m_time.month));
+  Wire.write(decToBcd((byte)m_time.year));
   
   /*Wire.write(decToBcd((byte)0));
   Wire.write(decToBcd((byte)52));
@@ -139,11 +129,11 @@ void TimeHandler::setRTCTime()
 void TimeHandler::printTime() 
 {
 #ifdef MODE_DMY
-  Serial.println(String(m_DOM) + "/" + String(m_month) + "/" + String(m_year) + " (DOW : " + String(m_DOW) + ")");
+  Serial.println(String(m_time.DOM) + "/" + String(m_time.month) + "/" + String(m_time.year) + " (DOW : " + String(m_time.DOW) + ")");
 #else
-  Serial.println(String(m_month) + "/" + String(m_DOM) + "/" + String(m_year) + " (DOW : " + String(m_DOW) + ")");
+  Serial.println(String(m_time.month) + "/" + String(m_time.DOM) + "/" + String(m_time.year) + " (DOW : " + String(m_time.DOW) + ")");
 #endif
 
-  Serial.println(String(m_hours) + ":" + String(m_mins) + ":" + String(m_secs));
+  Serial.println(String(m_time.hours) + ":" + String(m_time.mins) + ":" + String(m_time.secs));
 }
 #endif

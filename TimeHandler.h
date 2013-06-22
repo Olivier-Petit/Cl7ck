@@ -19,7 +19,18 @@
 
 #define MODE_DMY // Comment for MDY mode
 
-typedef struct Time Time;
+typedef struct DateTime DateTime;
+
+struct DateTime
+{
+  unsigned int hours;
+  unsigned int mins;
+  unsigned int secs;
+  unsigned int DOM;
+  unsigned int DOW;
+  unsigned int month;
+  unsigned int year;
+};
 
 class TimeHandler
 {
@@ -27,9 +38,7 @@ class TimeHandler
     TimeHandler();
     void initializeRTC();
     boolean updateTime();
-    unsigned int getHours();
-    unsigned int getMins();
-    unsigned int getSecs();
+    DateTime getTime();
     
     void setRTCTime();
     
@@ -38,14 +47,7 @@ class TimeHandler
     #endif
     
   private:
-    unsigned int m_hours;
-    unsigned int m_mins;
-    unsigned int m_secs;
-    unsigned int m_DOM;
-    unsigned int m_DOW;
-    unsigned int m_month;
-    unsigned int m_year;
-    
+    DateTime m_time;
     unsigned long m_lastRTCCheck;
     
     byte decToBcd(byte val);
