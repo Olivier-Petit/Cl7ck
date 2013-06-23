@@ -42,7 +42,9 @@ boolean quickGoToNextLevel = false; // Modes set it to false when a complicated 
 
 void setup()
 {
-  Serial.begin(9600);
+  #ifdef DEBUG
+    Serial.begin(9600);
+  #endif
 
   // Initialize RTC   
   rtc.initializeRTC();

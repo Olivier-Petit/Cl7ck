@@ -18,6 +18,7 @@
 #endif
 
 #include "font.h"
+#include "settings.h"
 
 #define BUFFER_SIZE 20
 
@@ -44,7 +45,9 @@ class Display
     int getBrightness();
     void setBrightness(int brightness);
     
-    void printBuffer();
+    #ifdef DEBUG
+      void printBuffer();
+    #endif
   
   private:
     byte m_buffer[BUFFER_SIZE];

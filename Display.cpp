@@ -148,6 +148,7 @@ void Display::setBrightness(int brightness)
   sendCommand(MAX_REG_INTENSITY, m_brightness);
 }
 
+#ifdef DEBUG
 void Display::printBuffer()
 {
   for(int i = 0 ; i < BUFFER_SIZE ; i++)
@@ -157,3 +158,4 @@ void Display::printBuffer()
   }
   Serial.println();
 }
+#endif

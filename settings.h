@@ -12,7 +12,7 @@
 #ifndef DEF_SETTINGS
 #define DEF_SETTINGS
 
-#define DEBUG
+//#define DEBUG
 
 #define PIN_BUZZER 3
 #define PIN_DISP   10
