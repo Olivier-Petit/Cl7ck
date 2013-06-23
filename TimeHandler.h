@@ -48,8 +48,9 @@ class TimeHandler
     void setRTCAlarmTime();
     void setAlarm(boolean on);
     boolean getAlarm();
-    void checkAlarm();
+    boolean checkAlarm();
     void stopAlarm();
+    void ring();
     
     #ifdef DEBUG
       void printTime();
@@ -62,6 +63,7 @@ class TimeHandler
     DateTime m_alarmTime;
     boolean m_alarmOn;
     boolean m_ringing;
+    unsigned long m_lastRTCAlarmCheck;
     unsigned long m_lastRing;
     
     byte decToBcd(byte val);

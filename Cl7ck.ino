@@ -51,10 +51,6 @@ void setup()
   for(int i = 0 ; i < STATE_LEVELS ; i++)
     mode[i] = 0;
 
-  //tone(PIN_BUZZER, 2100);
-  //delay(500);
-  //noTone(PIN_BUZZER);
-
   disp.clearBuffer();
   disp.setString(0, "Hello");
   disp.display();
@@ -65,6 +61,18 @@ void setup()
 void loop()
 {
   inputs.updateButtonStates();
+  if(rtc.checkAlarm())
+  {
+    rtc.ring();
+    
+    if(level != 0 || mode[0] != TIME)
+    {
+      firstCall = true;
+      disp.clearBuffer();
+      level = 0;
+      mode[0] = TIME;
+    }
+  }
 
   // ----------- Change Mode -------------
   if(level == 0 && inputs.pullButtonPress(OK, 1000))
@@ -87,6 +95,9 @@ void loop()
   {
     quickGoBack = false;
     quickGoToNextLevel = false;
+    
+    if(inputs.pullButtonPress(BACK))
+      rtc.stopAlarm();
 
     if(rtc.updateTime())
     {

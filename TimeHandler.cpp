@@ -34,7 +34,9 @@ TimeHandler::TimeHandler()
   m_time.year = 0U;
 
   m_lastRTCCheck = 0UL;
+  m_lastRTCAlarmCheck = 0UL;
   m_lastRing = 0UL;
+  m_ringing = false;
 }
 
 // Used to get the time from the chronodot
@@ -254,29 +256,66 @@ boolean TimeHandler::getAlarm()
   return m_alarmOn;
 }
 
-void TimeHandler::checkAlarm()
+boolean TimeHandler::checkAlarm()
 {
-  if(m_alarmOn)
+  if(millis() - m_lastRTCAlarmCheck > RTC_CHECK_INTERVAL)
   {
-    Wire.beginTransmission(DS3231S_ADDR);
-    Wire.write((byte)0x0F); // Control/status register
-    Wire.endTransmission();
-    Wire.requestFrom(DS3231S_ADDR, 1); // Request only one byte
-    
-    while(Wire.available())
+    if(m_alarmOn)
     {
-      m_ringing = Wire.read() & B00000001; // Check A1F flag
+      Wire.beginTransmission(DS3231S_ADDR);
+      Wire.write((byte)0x0F); // Control/status register
+      Wire.endTransmission();
+      Wire.requestFrom(DS3231S_ADDR, 1); // Request only one byte
+      
+      while(Wire.available())
+      {
+        if(m_ringing == false)
+          m_ringing = Wire.read() & B00000001; // Check A1F flag
+        else
+          Wire.read(); // Flush...
+      }
     }
     
-    // Clear the flag
-    Wire.beginTransmission(DS3231S_ADDR);
-    Wire.write((byte)0x0F);
-    Wire.write((byte)0);
-    Wire.endTransmission();
+    // Clear the flag only if not ringing
+    if(!m_ringing)
+    {
+      Wire.beginTransmission(DS3231S_ADDR);
+      Wire.write((byte)0x0F);
+      Wire.write((byte)0);
+      Wire.endTransmission();
+    }
+    
+    m_lastRTCAlarmCheck = millis();
   }
+  
+  return m_ringing;
 }
 
+void TimeHandler::stopAlarm()
+{
+  m_ringing = false;
+  noTone(PIN_BUZZER);
+  
+  // Clear the flag
+  Wire.beginTransmission(DS3231S_ADDR);
+  Wire.write((byte)0x0F);
+  Wire.write((byte)0);
+  Wire.endTransmission();
+}
 
+void TimeHandler::ring()
+{
+  if(m_ringing)
+  {
+    if(millis() - m_lastRing > 1000UL)
+      m_lastRing = millis();
+    
+    if(millis() - m_lastRing > 500UL)
+      noTone(PIN_BUZZER);
+    else
+      tone(PIN_BUZZER, 2100);
+  }
+}
 
 // --------- Debuging functions ---------
 #ifdef DEBUG
