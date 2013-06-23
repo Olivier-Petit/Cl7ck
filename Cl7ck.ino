@@ -10,6 +10,7 @@
 
 #include <SPI.h>
 #include <Wire.h>
+#include <OneWire.h>
 #include <avr/pgmspace.h>
 
 #include "settings.h"
@@ -17,6 +18,7 @@
 #include "font.h"
 #include "TimeHandler.h"
 #include "InputsHandler.h"
+#include "TempSensor.h"
 
 prog_char fontSet[FONT_SET_SIZE] PROGMEM = {
   f_0,f_1,f_2,f_3,f_4,f_5,f_6,f_7,f_8,f_9,
@@ -24,7 +26,7 @@ prog_char fontSet[FONT_SET_SIZE] PROGMEM = {
   f_a,f_b,f_c,f_d,f_e,f_f,f_g,f_h,f_i,f_j,f_k,f_l,f_m,f_n,f_o,f_p,f_q,f_r,f_s,f_t,f_u,f_v,f_w,f_x,f_y,f_z};
 
 // Lambda enumeration for modes
-enum{TIME = 0, DATE = 1, MENU = 2};
+enum{TIME = 0, DATE = 1, TEMP = 2, MENU = 3};
 enum{ALARM = 0, SET_BRIGHTNESS = 1, SET_TIME = 2, SET_DATE = 3};
 enum{SET_ALARM_ON_OFF = 0, SET_ALARM_TIME = 1};
 
@@ -33,6 +35,7 @@ enum{SET_ALARM_ON_OFF = 0, SET_ALARM_TIME = 1};
 Display disp(fontSet);
 TimeHandler rtc;
 InputsHandler inputs;
+TempSensor ts;
 
 int mode[STATE_LEVELS];
 int level = 0;
@@ -89,7 +92,7 @@ void loop()
   if(level == 0 && mode[0] != MENU && inputs.pullButtonPress(OK))
   {
     disp.clearBuffer();
-    mode[0] = (mode[0] + 1) % 2;
+    mode[0] = (mode[0] + 1) % 3;
   }
 
   // ---------- Modes handling ------------
@@ -129,6 +132,21 @@ void loop()
       disp.setString(2, '-');
       disp.setString(5, '-');
       disp.setDP(7, rtc.getAlarm()); // Dot to indicate when alarm is on/off
+      disp.display();
+    }
+  }
+  else if(level == 0 && mode[0] == TEMP) // ------------ Temperature ---------
+  {
+    quickGoBack = false;
+    quickGoToNextLevel = false;
+    
+    if(ts.updateTemp())
+    {
+      disp.setString(0, ts.getWhole(), 2);
+      disp.setDP(1, true);
+      disp.setString(2, ts.getFract(), 2);
+      disp.setString(5, "@C");
+      
       disp.display();
     }
   }
