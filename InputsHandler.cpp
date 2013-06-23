@@ -4,7 +4,7 @@
  * http://op414.net
  * License : CC BY-NC-SA http://creativecommons.org/licenses/by-nc-sa/3.0/
  * ------------
- * Inputs Handler.cpp : Implements InputsHandler class : handles button presses
+ * InputsHandler.cpp : Implements InputsHandler class : handles button presses
  * Created 22 june 2013
  */
 

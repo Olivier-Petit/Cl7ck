@@ -4,7 +4,7 @@
  * http://op414.net
  * License : CC BY-NC-SA http://creativecommons.org/licenses/by-nc-sa/3.0/
  * ------------
- * Inputs Handler.h : InputsHandler class definition
+ * InputsHandler.h : InputsHandler class definition
  * Created 22 june 2013
  */
 
