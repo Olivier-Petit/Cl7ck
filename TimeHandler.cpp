@@ -9,9 +9,9 @@
  */
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include <Arduino.h>
+  #include <Arduino.h>
 #else
-#include "WProgram.h"
+  #include "WProgram.h"
 #endif
 
 #include <Wire.h>
@@ -22,6 +22,9 @@
 // Constructor
 TimeHandler::TimeHandler()
 {
+  pinMode(PIN_BUZZER, OUTPUT);
+  digitalWrite(PIN_BUZZER, LOW);
+  
   m_time.hours = 0U;
   m_time.mins = 0U;
   m_time.secs = 0U;
@@ -31,6 +34,7 @@ TimeHandler::TimeHandler()
   m_time.year = 0U;
 
   m_lastRTCCheck = 0UL;
+  m_lastRing = 0UL;
 }
 
 // Used to get the time from the chronodot
@@ -177,6 +181,102 @@ int TimeHandler::setRTCTime()
     return 0;
   }
 }
+
+
+// --------- Alarm handling -------------
+
+DateTime TimeHandler::getAlarmTime()
+{
+  return m_alarmTime;
+}
+
+void TimeHandler::setAlarmTime(DateTime time)
+{
+  m_alarmTime = time;
+  
+  
+  // Validate data
+  if(m_alarmTime.hours == 65535)
+    m_alarmTime.hours = 23;
+  if(m_alarmTime.hours > 23)
+    m_alarmTime.hours = 0;
+  
+  if(m_alarmTime.mins == 65535)
+    m_alarmTime.mins = 59;
+  if(m_alarmTime.mins > 59)
+    m_alarmTime.mins = 0;
+  
+  if(m_alarmTime.secs == 65535)
+    m_alarmTime.secs = 59;
+  if(m_alarmTime.secs > 59)
+    m_alarmTime.secs = 0;
+}
+
+void TimeHandler::getRTCAlarmTime()
+{
+  Wire.beginTransmission(DS3231S_ADDR);
+  Wire.write((byte)0x07); // Start at register 7
+  Wire.endTransmission();
+  Wire.requestFrom(DS3231S_ADDR, 3); // Request three bytes (seconds, minutes, hours)
+
+  while(Wire.available()) // Wait for the data to come
+  {
+    // Read the data
+    m_alarmTime.secs = (unsigned int)bcdToDec(Wire.read());
+    m_alarmTime.mins = (unsigned int)bcdToDec(Wire.read());
+    m_alarmTime.hours = (unsigned int)bcdToDec(Wire.read());
+  }
+}
+
+void TimeHandler::setRTCAlarmTime()
+{
+  Wire.beginTransmission(DS3231S_ADDR);
+  Wire.write((byte)0x07); // Start at register 0x07 (alarm1's seconds)
+  
+  // Write the data
+  Wire.write(decToBcd((byte)m_alarmTime.secs));
+  Wire.write(decToBcd((byte)m_alarmTime.mins));
+  Wire.write(decToBcd((byte)m_alarmTime.hours));
+  
+  // A1MI, A1M2 & A1M3 have already been cleared by previous commands
+  // We now want to set A2M4 high, so that alarm only occurs when hours, minutes and seconds match
+  Wire.write((byte)B10000000);
+  Wire.endTransmission();
+}
+
+void TimeHandler::setAlarm(boolean on)
+{
+  m_alarmOn = on;
+}
+
+boolean TimeHandler::getAlarm()
+{
+  return m_alarmOn;
+}
+
+void TimeHandler::checkAlarm()
+{
+  if(m_alarmOn)
+  {
+    Wire.beginTransmission(DS3231S_ADDR);
+    Wire.write((byte)0x0F); // Control/status register
+    Wire.endTransmission();
+    Wire.requestFrom(DS3231S_ADDR, 1); // Request only one byte
+    
+    while(Wire.available())
+    {
+      m_ringing = Wire.read() & B00000001; // Check A1F flag
+    }
+    
+    // Clear the flag
+    Wire.beginTransmission(DS3231S_ADDR);
+    Wire.write((byte)0x0F);
+    Wire.write((byte)0);
+    Wire.endTransmission();
+  }
+}
+
+
 
 // --------- Debuging functions ---------
 #ifdef DEBUG

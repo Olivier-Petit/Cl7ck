@@ -24,10 +24,9 @@ prog_char fontSet[FONT_SET_SIZE] PROGMEM = {
   f_a,f_b,f_c,f_d,f_e,f_f,f_g,f_h,f_i,f_j,f_k,f_l,f_m,f_n,f_o,f_p,f_q,f_r,f_s,f_t,f_u,f_v,f_w,f_x,f_y,f_z};
 
 // Lambda enumeration for modes
-enum{
-  TIME = 0, DATE = 1, MENU = 2};
-enum{
-  ALARM = 0, SET_BRIGHTNESS = 1, SET_TIME = 2, SET_DATE = 3};
+enum{TIME = 0, DATE = 1, MENU = 2};
+enum{ALARM = 0, SET_BRIGHTNESS = 1, SET_TIME = 2, SET_DATE = 3};
+enum{SET_ALARM_ON_OFF = 0, SET_ALARM_TIME = 1};
 
 #define STATE_LEVELS 10
 
@@ -52,7 +51,6 @@ void setup()
   for(int i = 0 ; i < STATE_LEVELS ; i++)
     mode[i] = 0;
 
-  pinMode(PIN_BUZZER, OUTPUT);
   //tone(PIN_BUZZER, 2100);
   //delay(500);
   //noTone(PIN_BUZZER);
@@ -180,16 +178,189 @@ void loop()
       disp.display();
     }
   }
-  else if(level == 1 && mode[level] == ALARM) // ----------- Set Alarm ---------
+  else if(level == 1 && mode[level] == ALARM) // ----------- Alarm menu ---------
   {
+    boolean refresh = false;
+    quickGoToNextLevel = true;
     quickGoBack = true;
-    quickGoToNextLevel = false;
-
+    
     if(firstCall)
     {
-      disp.setString(0, "Not Done");
-      disp.display();
       firstCall = false;
+      refresh = true;
+    }
+    
+    
+    if(inputs.pullButtonPress(MINUS) || inputs.pullButtonPress(PLUS))
+    {
+      refresh = true;
+      mode[level + 1] = !(mode[level + 1]);
+    }
+    
+    if(refresh)
+    {
+      disp.clearBuffer();
+      
+      switch(mode[level + 1])
+      {
+        case SET_ALARM_ON_OFF:
+        {
+          disp.setString(0, "On-Off");
+          break;
+        }
+        case SET_BRIGHTNESS:
+        {
+          disp.setString(0, "Time");
+          break;
+        }
+      }
+      
+      disp.display();
+    }
+  }
+  else if(level >= 1 && mode[1] == ALARM)
+  {
+    if(mode[2] == SET_ALARM_ON_OFF) // --------- Setting alarm on/off --------
+    {
+      boolean refresh = false;
+      quickGoToNextLevel = false;
+      quickGoBack = true;
+      
+      if(firstCall)
+      {
+        firstCall = false;
+        refresh = true;
+      }
+      
+      if(inputs.pullButtonPress(PLUS) || inputs.pullButtonPress(MINUS))
+      {
+        rtc.setAlarm(!(rtc.getAlarm()));
+        refresh = true;
+      }
+      
+      if(inputs.pullButtonPress(OK))
+        goBack();
+        
+      if(refresh)
+      {
+        disp.clearBuffer();
+        
+        if(rtc.getAlarm()) // Alarm on
+          disp.setString(0, "On");
+        else
+          disp.setString(0, "Off");
+          
+        disp.display();
+      }
+    }
+    else if(mode[2] == SET_ALARM_TIME) // --------- Setting alarm time -------
+    {
+      boolean refresh = false;
+      quickGoBack = true;
+  
+      if(firstCall)
+      {
+        firstCall = false;
+        refresh = true;
+  
+        if(level == 2) // Hours
+        {
+          rtc.getRTCAlarmTime();
+          disp.setDP(0, true);
+          disp.setDP(1, true);
+        }
+        else if(level == 3) // Mins
+        {
+          disp.setDP(0, false); 
+          disp.setDP(1, false);
+          disp.setDP(3, true);
+          disp.setDP(4, true);
+        }
+        else if(level == 4) // Seconds
+        {
+          disp.setDP(3, false); 
+          disp.setDP(4, false);
+          disp.setDP(6, true);
+          disp.setDP(7, true);
+        }
+      }
+  
+      DateTime atime = rtc.getAlarmTime();
+  
+      if(level ==  2) // Hours
+      {
+        quickGoToNextLevel = true;
+  
+        if(inputs.pullButtonPress(PLUS))
+        {
+          refresh = true;
+          atime.hours = atime.hours + 1;
+        }
+  
+        if(inputs.pullButtonPress(MINUS))
+        {
+          refresh = true;
+          atime.hours = atime.hours - 1;
+        }
+      }
+      else if(level == 3) // Mins
+      {
+        quickGoToNextLevel = true;
+  
+        if(inputs.pullButtonPress(PLUS))
+        {
+          refresh = true;
+          atime.mins = atime.mins + 1;
+        }
+  
+        if(inputs.pullButtonPress(MINUS))
+        {
+          refresh = true;
+          atime.mins = atime.mins - 1;
+        }
+      }
+      else if(level == 4) // Secs
+      {
+        quickGoToNextLevel = false;
+  
+        if(inputs.pullButtonPress(PLUS))
+        {
+          refresh = true;
+          atime.secs = atime.secs + 1;
+        }
+  
+        if(inputs.pullButtonPress(MINUS))
+        {
+          refresh = true;
+          atime.secs = atime.secs - 1;
+        }
+  
+        if(inputs.pullButtonPress(OK)) // Done !
+        {
+          rtc.setAlarmTime(atime);
+          rtc.setRTCAlarmTime(); // Write alarm time to DS3231
+  
+          level = 1;
+          mode[2] = SET_ALARM_ON_OFF;
+          firstCall = true;
+          disp.clearBuffer();
+          disp.setDP(6, false);
+          disp.setDP(7, false);
+        }
+      }
+  
+      if(refresh)
+      {
+        // The TimeHandler class validates the data, so use it before display.
+        rtc.setAlarmTime(atime);
+        atime = rtc.getAlarmTime(); // Get the validated data
+  
+        // Display it !
+        disp.setString(0, atime.hours, 2);
+        disp.setString(3, atime.mins, 2);
+        disp.setString(6, atime.secs, 2);
+        disp.display();
+      }
     }
   }
   else if(level == 1 && mode[level] == SET_BRIGHTNESS) // ---------- Set Brightness -----------
@@ -432,7 +603,7 @@ void loop()
         rtc.setTime(time);
 
         // Finaly, write date and time to DS3231
-        if(rtc.setRTCTime() == 0) // Everithing's fine
+        if(rtc.setRTCTime() == 0) // Everything's fine
         {
           level = 0;
           mode[0] = DATE;
