@@ -82,6 +82,8 @@ byte Display::getChar(char c)
     return (byte)pgm_read_byte_near(m_fontSet + 36 + (c - 'a'));
   else if(c == '-')
     return (byte)0x01;
+  else if(c == '@')
+    return (byte)0x63;
   
   return (byte)0;
 }
