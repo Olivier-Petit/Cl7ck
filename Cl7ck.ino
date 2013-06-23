@@ -66,7 +66,7 @@ void loop()
 {
   inputs.updateButtonStates();
 
-  // /----------- Change Mode -------------
+  // ----------- Change Mode -------------
   if(level == 0 && inputs.pullButtonPress(OK, 1000))
   {
     disp.clearBuffer();
@@ -95,6 +95,8 @@ void loop()
       disp.setString(0, t.hours, 2);
       disp.setString(3, t.mins, 2);
       disp.setString(6, t.secs, 2);
+      
+      disp.setDP(7, rtc.getAlarm()); // Dot to indicate when alarm is on/off
       disp.display();
     }
   }
@@ -113,6 +115,7 @@ void loop()
 
       disp.setString(2, '-');
       disp.setString(5, '-');
+      disp.setDP(7, rtc.getAlarm()); // Dot to indicate when alarm is on/off
       disp.display();
     }
   }
@@ -126,6 +129,7 @@ void loop()
     {
       refresh = true;
       firstCall = false;
+      disp.setDP(7, false); // Remove the alarm indicator dot
     }
 
     if(inputs.pullButtonPress(MINUS))
