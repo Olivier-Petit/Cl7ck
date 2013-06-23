@@ -91,6 +91,7 @@ void loop()
 
   if(level == 0 && mode[0] != MENU && inputs.pullButtonPress(OK))
   {
+    firstCall = true;
     disp.clearBuffer();
     mode[0] = (mode[0] + 1) % 3;
   }
@@ -140,12 +141,18 @@ void loop()
     quickGoBack = false;
     quickGoToNextLevel = false;
     
-    if(ts.updateTemp())
+    if(firstCall)
     {
-      disp.setString(0, ts.getWhole(), 2);
+      disp.setString(0,"----  @C");
       disp.setDP(1, true);
+    }
+    
+    if(ts.updateTemp() || firstCall)
+    {
+      firstCall = false;
+      
+      disp.setString(0, ts.getWhole(), 2);
       disp.setString(2, ts.getFract(), 2);
-      disp.setString(5, "@C");
       
       disp.display();
     }
