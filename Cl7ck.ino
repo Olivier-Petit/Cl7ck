@@ -5,7 +5,7 @@
  * License : CC BY-NC-SA http://creativecommons.org/licenses/by-nc-sa/3.0/
  * ------------
  * Cl7ck.ino : Main file
- * Created 11 may 2012
+ * Created 11 may 2013
  */
 
 #include <SPI.h>
